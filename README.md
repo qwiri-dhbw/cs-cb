@@ -95,7 +95,7 @@ VarDecl
 
 # Reguläre Ausdrücke
 
-## **` 🔥 HOT ` **Endliche Automaten
+## Endliche Automaten
 
 <details>
 <summary>Hexadezimalzahlen</summary>
@@ -573,7 +573,7 @@ comparison : NUMBER (LESS|GREATER) NUMBER
 
 ---
 
-## **` 🔥 HOT ` ** Grammatik in Java
+## Grammatik in Java
 
 <details>
 <summary><code>while</code> Statement (<code>expression</code> und <code>statement</code> gegeben)</summary>
@@ -646,7 +646,7 @@ Buchstabe ::= [a-z] [A-Z]
 
 # Recursive Descent Parser
 
-## **` 🔥 HOT `** First Sets etc.
+## First Sets etc.
 
 <details>
 <summary><code>LBRACKET, RBRACKET, COMMA, IDENTIFIER, NUMBER</code></summary>
