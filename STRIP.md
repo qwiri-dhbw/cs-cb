@@ -64,43 +64,6 @@ VarDecl
 
 # Reguläre Ausdrücke
 
-> Hexadezimalzahlen bestehen aus dem Prefix 0x und mindestens eine Ziffer aus 0-9 und A-F.
-> Beispiel: 0xA4, 0x00C3
-> 
-> Beschreiben Sie Hexadezimalzahlen mit einem regulären Ausdruck
-
-```re
-0x[0-9A-F]+
-```
-
-> Erstellen Sie einen endlichen Automaten, der Hexadezimalzahlen akzeptiert
-
-```
-Start: (0, expectX)
-expectX: (x, expectFirstDigit)
-expectFirstDigit: (0-9A-F, digitIter)
-digitIter: (0-9A-F, digitIter) Endzustand
-```
-
-> Erstellen Sie einen weiteren Automaten, der Namen, die aus mindestens einem Kleinbuchstaben (a-z) bestehen, akzeptiert. Beispiel: `adc`
-
-```
-Start: (a-z, letterIter)
-letterIter: (a-z, letterIter) Endzustand
-```
-
-> Fügen Sie die beiden Automaten zu einem Automaten zusammen, der sowohl Hexadezimalzahlen, als auch Namen akzeptiert
-
-```
-Start: (0, expectX) (a-z, letterIter)
-expectX: (x, expectFirstDigit)
-expectFirstDigit: (0-9A-F, digitIter)
-digitIter: (0-9A-F, digitIter) Endzustand
-letterIter: (a-z, letterIter) Endzustand
-```
-
----
-
 > Wie können Sie einen kombinierten nicht-deterministischen endlichen Automaten `BC` erstellen, der einen Base64-kodierten String mit nachfolgender Prüfsumme akzeptiert?
 
 Epsilon Übergang von den Endzuständen von B in den Startzustand von C
@@ -140,25 +103,11 @@ cIter ::= ɛ
 
 ---
 
-> Geben Sie das allgemeine Schema für die Linksfaktorisierung an, um die Linksgleichheit von 2 Produktionen zu beseitigen
-
-```
-n: alpha beta
-n: alpha gamma
-zu
-n: npre npost
-npre: alpha
-npost: beta | gamma
-```
-
----
-
 ## Grammatikproduktionen, LL(1)
 
-> Gegeben [sind] die folgenden linksrekursive Grammatikproduktion.
 > Wandeln Sie diese in äquivalente rechtsrekursive Grammatikproduktionen.
 >
-> Hinweis: Es genügt die Linksrekursion zu beseitigen. Weiteres kürzen ist nicht erforderlich.
+> **Note**: Es genügt die Linksrekursion zu beseitigen. Weiteres kürzen ist nicht erforderlich.
 
 > ```
 > P1) identifier : identifier ZIFFER  
@@ -220,103 +169,6 @@ ArgListRecursive ::= Arg ArgListRecursive | ɛ
 > Das First Set von Arg enthält nicht ɛ. Welche Bedingung muss für das First Set von Arg außerdem gelten, damit die Grammatik LL(1) ist?
 
 Die Selection Sets für Produktionen für ArgListRecursive müssen disjunkt sein. Daher muss First(Arg) diskunkt mit Follow(ArgListRecursive) sein, darf also nicht ")" enthalten
-
----
-
-> Gegeben [sind] die folgenden Grammatikproduktionen
->
-> ```
-> P1) ifstmt: IF expr THEN stmt
-> P2) ifstmt: IF expr THEN stmt ELSE
-> P3) ifstmt: IF SIGNAL THEN stmt
-> ```
->
-> Beseitigen Sie die Linksgleichheit durch wiederholte Anwendung der Linksfaktorisierung
-
-```
-n = ifstmt
-alpha = IF
-beta = (expr THEN stmt) | (expr THEN stmt ELSE)
-gamma = SIGNAL THEN stmt
-
-ifstmt : ifstmtpre ifstmtpost
-ifstmtpre : IF
-ifstmtpost : (expr THEN stmt) | (expr THEN stmt ELSE) | (SIGNAL THEN stmt)
-
-n = ifstmtpost
-alpha = expr THEN stmt
-beta = epsilon
-gamma = ELSE
-
-ifstmt : ifstmtpre ifstmtpost
-ifstmtpre : IF
-ifstmtpost : ifstmtpostpre ifstmtpostpost
-ifstmtpostpre : expr THEN stmt
-ifstmtpostpost : epsilon | else
-ifstmtpost : SIGNAL THEN stmt
-```
-
----
-
-> Ein Widerstandsnetzwerk werde folgendermaßen beschrieben:
-> Widerstände werden durch `IDENT` bezeichnet.
-> Parallel geschaltete Wiederstände werden durch operator `PAR` verknüpft.
-> Seriell geschaltete Wiederstände werden durch operator `SEQ` verknüpft.
-> operator `PAR` hat Priorität vor operator `SEQ`.
-> Klammerung (`LPAREN`, `RPAREN`) ist erlaubt.
-> Einzelne Widerstände können mit einem vorgeschobenen `L` als induktiv und mit `C` als kapazitiv markiert werden.
-> Beispiele:
->
-> ```
-> R0 PAR R1
-> R0 SEQ L R1 PAR R2
-> (R0 SEQ C R5 SEQ  L R4) PAR R1
-> ```
-> 
-> Erstellen sie eine LL(1) Grammatik für ein solches Widerstandsnetzwerk. 
-> Die Behandlung von Leerzeichen können Sie ignorieren. 
-> Ebenso müssen Sie keine Regeln für die Terminalsymbole (`IDENT`, `PAR`, `SEQ`, `LPAREN`, `RPAREN`) angegeben werden
-
-```
-TerminalSymbole: IDENT, PAR, SEQ, LPAREN, RPAREN
-NonTerminalSymbole: seqExpression, parExpression, atomicExpression
-StartSymbol: seqExpression
-Produktionen:
-seqExpression: parExpression (SEQ parExpression)*
-parExpression: atomicExpression (PAR atomicExpression)*
-atomicExpression: (L|C)? IDENT
-atomicExpression: LPAR seqExpression RPAR
-```
-
----
-
-> Mengenoperationen werden folgendermaßen beschrieben:
-> Mengen werden durch Bezeichner (`IDENT`) oder durch eine Liste von Elementen angegeben (begrenzt mit Mengenklammern {}). 
-> Elemente werden durch das Token ELEM dargestellt.
-> 
-> Es gibt die Operationen `∪` (Vereinigung), `∩` (Schnitt), `∖` (Differenz) und `⨯` (karthesisches Produkt). 
-> Neben diesen Operationen ist es möglich, Ausdrücke durch Klammern zu verschachteln.
-> 
-> Die Differenz hat die höchste Priorität. Die Junktoren `∪` und `∩` binden stärker als `⨯`.
-> Beispiele für zulässige Mengenausdrücke sind: `(M1 ∖ M2 ∖ M3 ∪ M4) ⨯ { ELEM ELEM }`
-> 
-> Erstellen sie eine LL(1) Grammatik für ein solches Widerstandsnetzwerk. Die Behandlung von Leerzeichen können Sie ignorieren. 
-> Ebenso müssen Sie keine Regeln für die Terminalsymbole (`IDENT`, `ELEM`, `LPAREN`, `RPAREN`, `LBRACE`, `RBRACE`, `∪,` `∩`, `∖`, `⨯`) angeben
-
-```
-Startsymbol: kartExpr
-Terminalsymbole: (IDENT, ELEM, LPAREN, RPAREN, LBRACE, RBRACE, ∪, ∩, ∖,⨯,  )
-NonTerminalsymbole: kartExpr, junktorExpr, junktor, diffExpr, parantheseExpr, literalExpr, elemlist
-Produktionen:
-kartExpr : junktorExpr (x junktorExpr)*
-junktorExpr : diffExpr (junktor diffExpr)*
-junktor: ∪ | ∩
-diffExpr: parantheseExpr (\ parantheseExpr)*
-parantheseExpr: LPAREN diffExpr RPAREN | IDENT | literalExpr
-literalExpr: LBRACE elemlist RBRACE
-elemlist: ELEM elemlist
-elemlist: epsilon
-```
 
 ---
 
@@ -393,6 +245,17 @@ X ::= X α | β
 wird zu
 X ::= β X'
 X' ::= α X' | ɛ 
+```
+
+> Geben Sie das allgemeine Schema für die Linksfaktorisierung an, um die Linksgleichheit von 2 Produktionen zu beseitigen
+
+```
+n: alpha beta
+n: alpha gamma
+zu
+n: npre npost
+npre: alpha
+npost: beta | gamma
 ```
 
 ---
@@ -494,61 +357,6 @@ void parseDimensionListRecursive() {
 
 ---
 
-**CSV (`COMMA, NUMBER, TEXT, LINEBREAK`)**
-
-> Gegeben [ist] die Grammatik G mit
->
-> ```
-> Terminals = { COMMA, NUMBER, TEXT, LINEBREAK }
-> NonTerminals = { csvFile, csvLine, csvEntry }
-> StartSymbol = csvFile
-> 
-> Produktionen und Selection Sets:
-> PF1) csvFile: csvLine csvFile
-> SELECT(PF1) = { NUMBER, TEXT, LINEBREAK }
-> PF2) csvFile: epsilon
-> SELECT(PF2) = { # }
-> PL1) csvLine: csvEntry COMMA csvLine
-> SELECT(PL1) = { NUMBER, TEXT }
-> PL2) csvLine: LINEBREAK
-> SELECT(PL2) = { LINEBREAK }
-> PE1) csvEntry: NUMBER
-> SELECT(PE1) = { NUMBER }
-> PE2) csvEntry: TEXT
-> SELECT(PE2) = { TEXT }
-> ```
->
-> Erstellen Sie einen recursive descent Parser für diese Grammatik in Pseudocode. 
-> Ein Lexer mit den Methoden `getLookAheadToken()`, `advance()` und `expect(Token)`  ist vorhanden
-
-```java
-void processCsvFile() {
-	if (lexer.lookAheadToken() in (NUMBER, TEXT, LINEBREAK)) {
-		processCsvLine();
-		processCsvFile();
-	} else {
-		lexer.expect(EOF);
-	} 
-}
-void processCsvLine() {
-	if (lexer.lookAheadToken() in (NUMBER, TEXT)) {
-		processCsvEntry();
-		lexer.expect(COMMA);
-		processCsvLine();
-	} else {
-		lexer.expect(LINEBREAK)
-	} 
-
-void processCsvEntry() {
-	if (lexer.lookAhead() in (NUMBER, TEXT)) {
-		lexer.advance();
-    } else {
-		throw error;
-    }
-}
-
-```
-
 **`PRINT, LBRACE, RBRACE`**
 
 > Gegeben die Grammatik G mit
@@ -605,8 +413,6 @@ SELECT(P4) = FIRST(P4) = { LBRACE, PRINT }
 
 `SELECT(P5)` muss disjunkt zu `SELECT(P3)` und `SELECT(P4)` sein. 
 Daher darf `FIRST(otherstmt)` [`RBRACE`, `LBRACE`, `PRINT` und *epsilon*] nicht enthalten
-
-</details>
 
 ---
 
