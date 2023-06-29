@@ -20,28 +20,29 @@ Semantische Analyse
 ---
 
 > Geben Sie für die folgenden Fehlermeldungen an, von welcher Compilephase sie gemeldet werden
->
-> 1) Fehlende schließende Klammer
 
-Syntaktische Analyse
-
-> 2) Fehlendes Hochkomma am Ende eines Stringliterals
-
-Lexikalische Analyse
-
-> 3) Fehlendes Return in einer Funktion
-
-Semantische Analyse
-
-> 4) Fehlendes Semikolon eines Statements
-
-Syntaktische Anaylse
+| Fehler                                           | Compilephase         |
+| ------------------------------------------------ | -------------------- |
+| Fehlende schließende Klammer                     | Syntaktische Analyse |
+| Fehlendes Hochkomma am Ende eines Stringliterals | Lexikalische Analyse |
+| Fehlendes Return in einer Funktion               | Semantische Analyse  |
+| Fehlendes Semikolon eines Statements             | Syntaktische Anaylse |
 
 ---
 
-> Gegeben [ist] der Programmausschnitt: `mwst = preis + 0.19 * preis;`. Skizzieren Sie das Ergebnis der 1. und 2. Compilephase für diesen Programmausschnitt
+> Gegeben [ist] der Programmausschnitt: 
+>
+> ```java
+> `mwst = preis + 0.19 * preis;`
+> ```
+> 
+> Skizzieren Sie das Ergebnis der 1. und 2. Compilephase für diesen Programmausschnitt
 
-**Phase 1**: `mwst|=|preis|+|0.19|*|preis|;`
+**Phase 1**: 
+
+```
+mwst|=|preis|+|0.19|*|preis|;
+```
 
 **Phase 2**:
 
@@ -95,10 +96,8 @@ VarDecl
 
 # Reguläre Ausdrücke
 
-## Endliche Automaten
-
 <details>
-<summary>Hexadezimalzahlen</summary>
+<summary>👾 Hexadezimalzahlen</summary>
 
 
 > Hexadezimalzahlen bestehen aus dem Prefix 0x und mindestens eine Ziffer aus 0-9 und A-F.
@@ -145,7 +144,7 @@ letterIter: (a-z, letterIter) Endzustand
 ---
 
 <details>
-<summary>Natürliche Zahlen</summary>
+<summary>👾 Natürliche Zahlen</summary>
 
 
 > Erstellen Sie einen regulären Ausdruck, der alle natürlichen Zahlen > 0 erlaubt (z. B. `347`)
@@ -183,7 +182,7 @@ letterIter: ([a-zA-Z0-9], letterIter) Endzustand
 ---
 
 <details>
-<summary>Python Stringliterale</summary>
+<summary>👾 Python Stringliterale</summary>
 
 > Erstellen Sie einen endlichen Automaten, der Python Stringliterale (mit 3 Anführungszeichen) akzeptiert.
 
@@ -201,20 +200,8 @@ ende: Endzustand
 
 ---
 
-> Erstelle für den regulären Ausdruck `([A-Z][0-9])*|(xy)+` einen äquivalenten deterministischen endlichen Automaten
-
-```
-Start: (A-Z, afterBigLetter) (x, afterX) Endzustand
-afterBigLetter: (0-9, afterDigit)
-afterDigit: (A-Z, afterBigLetter) Endzustand
-afterX: (y, afterY)
-afterY: (x, afterX) Endzustand
-```
-
----
-
 <details>
-<summary>Base64</summary>
+<summary>👾 Base64</summary>
 
 > Base64 ist ein Verfahren zur Kodierung von 8-Bit-Binärdaten mithilfe der druckbaren ASCII Zeichen A bis Z, a bis z, 0 bis 9, + und /. 
 > Jedem der insgesamt 64 unterschiedlichen Zeichen ist ein eindeutiges Bitmuster mit 6 Bit zugeordnet.
@@ -263,7 +250,17 @@ Epsilon Übergang von den Endzuständen von B in den Startzustand von C
 
 ---
 
-## Sonstige Aufgaben
+> Erstelle für den regulären Ausdruck `([A-Z][0-9])*|(xy)+` einen äquivalenten deterministischen endlichen Automaten
+
+```
+Start: (A-Z, afterBigLetter) (x, afterX) Endzustand
+afterBigLetter: (0-9, afterDigit)
+afterDigit: (A-Z, afterBigLetter) Endzustand
+afterX: (y, afterY)
+afterY: (x, afterX) Endzustand
+```
+
+---
 
 > Gegeben sind zwei endliche Automaten `A` und `B`. Wie lautet der Ansatz, um einen endlichen Automaten `AB` zu erstellen, der alle Worte akzeptiert, die von Automat `A` oder von Automat `B` akzeptiert werden?
 
@@ -278,7 +275,7 @@ Gemeinsamer Startzustand
 Schreiben Sie die Grammatikproduktion `...` in äquivalente Grammatikproduktionen um, die weder `+`, `?`, noch `*`
 
 <details>
-<summary><code>a ::= (b)? (c)*</code></summary>
+<summary>📝 <code>a ::= (b)? (c)*</code></summary>
 
 ```
 a ::= bOpt cIter;
@@ -291,7 +288,7 @@ cIter ::= c cIter | ɛ;
 ---
 
 <details>
-<summary><code>a ::= b | c+</code></summary>
+<summary>📝 <code>a ::= b | c+</code></summary>
 
 ```
 a ::= b
@@ -305,7 +302,7 @@ cIter ::= ɛ
 ---
 
 <details>
-<summary><code>a ::= b? c* | d</code></summary>
+<summary>📝 <code>a ::= b? c* | d</code></summary>
 
 ```
 a: bOpt cIter
@@ -321,7 +318,7 @@ a: d
 ---
 
 <details>
-<summary><code>anton: (berta | caesar)? dora+</code></summary>
+<summary>📝 <code>anton: (berta | caesar)? dora+</code></summary>
 
 ```
 anton: berta_caesar_opt dora_recursive
@@ -383,10 +380,10 @@ identifierRecursive : ZIFFER identifierRecursive  | ɛ
 X = nonT
 nonT: (MTERM nonT MTERM | LTERM nonT) nonTRecursive
 nonTRecursive: RTERM nonTRecursive | ɛ 
+```
 
 ---
 
-```
 > Gegeben [sind] die folgenden Grammatikproduktionen für das NonTerminal ifStmt
 >
 > ```
@@ -576,7 +573,7 @@ comparison : NUMBER (LESS|GREATER) NUMBER
 ## Grammatik in Java
 
 <details>
-<summary><code>while</code> Statement (<code>expression</code> und <code>statement</code> gegeben)</summary>
+<summary>🧑‍💻 <code>while</code> Statement (<code>expression</code> und <code>statement</code> gegeben)</summary>
 
 ```
 whilestmt: "while" "(" expression ")" "{" stmtlist "}"
@@ -588,7 +585,7 @@ stmtlist: statement*
 ---
 
 <details>
-<summary><code>try..catch</code></summary>
+<summary>🧑‍💻 <code>try..catch</code></summary>
 
 ```
 trystmt: try LBRACE stmtlist RBRACE catchlist
@@ -649,7 +646,7 @@ Buchstabe ::= [a-z] [A-Z]
 ## First Sets etc.
 
 <details>
-<summary><code>LBRACKET, RBRACKET, COMMA, IDENTIFIER, NUMBER</code></summary>
+<summary>😡 <code>LBRACKET, RBRACKET, COMMA, IDENTIFIER, NUMBER</code></summary>
 
 
 > Gegeben [ist] die Grammatik G mit
@@ -716,7 +713,7 @@ void parseDimensionListRecursive() {
 ---
 
 <details>
-<summary><code>LETTER, NUMBER, LPAREN, RPAREN</code></summary>
+<summary>😡 <code>LETTER, NUMBER, LPAREN, RPAREN</code></summary>
 
 > Gegeben [ist] die Grammatik G mit
 >
@@ -802,7 +799,7 @@ void processParantheses() {
 ---
 
 <details>
-<summary>CSV (<code>COMMA, NUMBER, TEXT, LINEBREAK</code>)</summary>
+<summary>😡 CSV (<code>COMMA, NUMBER, TEXT, LINEBREAK</code>)</summary>
 
 > Gegeben [ist] die Grammatik G mit
 >
@@ -862,7 +859,7 @@ void processCsvEntry() {
 ---
 
 <details>
-<summary><code>COMMA, IDENT, NUMBER, LPAREN, RPAREN</code></summary>
+<summary>😡 <code>COMMA, IDENT, NUMBER, LPAREN, RPAREN</code></summary>
 
 > Gegeben die Grammatik G für einen Funktionsaufruf mit
 > 
@@ -934,7 +931,7 @@ void getArg() {
 ---
 
 <details>
-<summary><code>PRINT, LBRACE, RBRACE</code></summary>
+<summary>😡 <code>PRINT, LBRACE, RBRACE</code></summary>
 
 > Gegeben die Grammatik G mit
 >
@@ -1151,7 +1148,7 @@ Dead branch elimination
 # Zwischencodegenerierung
 
 <details>
-<summary><code>index</code> Counter to 10</summary>
+<summary>🚂 <code>index</code> Counter to 10</summary>
 
 > Gegeben [ist] der folgende Java Codeausschnitt
 >
@@ -1190,7 +1187,7 @@ after_while:
 ---
 
 <details>
-<summary><code>input</code> if elseif else</summary>
+<summary>🚂 <code>input</code> if elseif else</summary>
 
 > Gegeben ist der folgende Java Codeausschnitt
 >
@@ -1244,7 +1241,7 @@ exit:
 ---
 
 <details>
-<summary><code>index</code> und <code>output</code> in <code>while</code> mit <code>break</code></summary>
+<summary>🚂 <code>index</code> und <code>output</code> in <code>while</code> mit <code>break</code></summary>
 
 > Gegeben [sei] der folgende Java Codeausschnitt:
 >
@@ -1296,7 +1293,7 @@ whileExit:
 ---
 
 <details>
-<summary>Neues Java Statement: <code>NUMERIC_IF</code></summary>
+<summary>🚂 Neues Java Statement: <code>NUMERIC_IF</code></summary>
 
 > Wir ergänzen die Programmiersprache Java um ein neues Statement NUMERIC_IF:
 >
