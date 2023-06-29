@@ -1,6 +1,6 @@
 # Compilephasen
 
-> **` 🔴 HOT `** Phasen angeben, Input, Output, Typische Fehlermeldungen
+> **` 🔥 HOT `** Phasen angeben, Input, Output, Typische Fehlermeldungen
 
 | Phase                    | Input        | Output                           | Typische Fehlermeldung                   |
 | ------------------------ | ------------ | -------------------------------- | ---------------------------------------- |
@@ -57,12 +57,55 @@ assignStmt
 
 ---
 
+> Gegeben ist der Programmausschnitt
+>
+> ```java
+> int result = i - 7 - 2 * value;
+> ```
+>
+> Skizzieren Sie den AST für diesen Programmausschnitt
+
+```
+VarDecl
+	IDENTIFIER int
+	IDENTIFIER result
+	InitExpr
+		MINUS
+			MINUS
+				IDENTIFIER i
+				INTEGER 7
+			MUL
+				INTEGER 2
+				IDENTIFIER value
+```
+
+> Beschreiben Sie die Aktivitäten der semantischen Analyse für diesen Programmausschnitt
+
+- Prüfen ob `result` bereits existiert
+- `result` in Symboltabelle einfügen
+- Prüfen ob `value` bereits existiert
+- Verbindung zur Definition von `value` herstellen
+- Prüfen ob Operation `*` auf den Typen von `2` und `value` definiert ist
+- Prüfen ob Operation `–` auf den Typen `i`, `7` und `2 * value` definiert ist
+- Den Teilausdrücken Typen zuweisen
+- `result` den Typ `int` zuweisen
+- Prüfen ob der Typ der rechten Seite kompatibel zum Typ von `result` ist
+
+---
+
 # Reguläre Ausdrücke
+
+## **` 🔥 HOT ` **Endliche Automaten
+
+<details>
+<summary>Hexadezimalzahlen</summary>
+
 
 > Hexadezimalzahlen bestehen aus dem Prefix 0x und mindestens eine Ziffer aus 0-9 und A-F.
 > Beispiel: 0xA4, 0x00C3
 > 
 > Beschreiben Sie Hexadezimalzahlen mit einem regulären Ausdruck
+> 
 > **Note** ggf. zusätzlich mit Kleinbuchstaben, auf Aufgabe achten!
 
 ```re
@@ -97,7 +140,13 @@ digitIter: (0-9A-F, digitIter) Endzustand
 letterIter: (a-z, letterIter) Endzustand
 ```
 
+</details>
+
 ---
+
+<details>
+<summary>Natürliche Zahlen</summary>
+
 
 > Erstellen Sie einen regulären Ausdruck, der alle natürlichen Zahlen > 0 erlaubt (z. B. `347`)
 
@@ -129,7 +178,12 @@ letterStart: ([a-zA-Z], letterIter) Endzustand
 letterIter: ([a-zA-Z0-9], letterIter) Endzustand
 ```
 
+</details>
+
 ---
+
+<details>
+<summary>Python Stringliterale</summary>
 
 > Erstellen Sie einen endlichen Automaten, der Python Stringliterale (mit 3 Anführungszeichen) akzeptiert.
 
@@ -142,6 +196,8 @@ innerhochkomma1: (", innerhochkomma2) , ([^"], innerLiteral)
 innerhochkomma2: (", ende) , ([^"], innerLiteral)
 ende: Endzustand
 ```
+
+</details>
 
 ---
 
@@ -157,6 +213,58 @@ afterY: (x, afterX) Endzustand
 
 ---
 
+<details>
+<summary>Base64</summary>
+
+> Base64 ist ein Verfahren zur Kodierung von 8-Bit-Binärdaten mithilfe der druckbaren ASCII Zeichen A bis Z, a bis z, 0 bis 9, + und /. 
+> Jedem der insgesamt 64 unterschiedlichen Zeichen ist ein eindeutiges Bitmuster mit 6 Bit zugeordnet.
+>
+> Die Kodierung erfolgt in Einheiten zu je 24 Bit. Es werden also immer drei Byte (`3*8 = 24 Bit`) des Eingabe-Bytestroms durch vier Base64-Zeichen (`4 * 6 = 24 Bit`) mit den passenden Bitmustern kodiert. 
+> Die Anzahl der Zeichen in einem Base64-kodierten String ist also immer ein Vielfaches der Zahl Vier (Alignment).
+> 
+> Lässt sich die Eingabe nicht vollständig in Einheiten zu je 24 Bit einteilen, wird die Eingabe am Ende mit Füllbits (dem sogenannten Padding) ergänzt. 
+> 6-Bit-Blöcke, die vollständig aus Füllbits bestehen, werden nicht durch die oben aufgeführten Base64-Zeichen sondern mit Gleichheitszeichen = kodiert. 
+> Am Ende eines Base64-kodierten Strings können also 0, 1 oder 2 Gleichheitszeichen = stehen.
+>
+> Gültige Base64-Zeichenketten sind zum Beispiel AA==, AQ==, Qg==, RxE=, CBU=, DeadC0de, C0ffee==, QmFzZTY0, SGVsbG8gV29ybGQh. Das leere Wort wird ebenfalls akzeptiert.
+>
+> Geben Sie einen regulären Ausdruck für Base64-Zeichen an
+
+```re
+[a-zA-Z0-9+/]
+```
+
+> Erstellen Sie einen regulären Ausdruck für gültige Base64-kodierte Strings. Sie dürfen dabei den regulären Ausdruck für Base64-Zeichen mit x substituieren
+
+```re
+(xxxx)*(x===|xx==|xxx=)?
+```
+
+> Bei dem leicht modifizierten Verfahren Radix-64 wird eine CRC-24 Prüfsumme an die Base64-kodierten Daten angehängt. 
+> Die kodierte Prüfsumme beginnt mit einem `=` Zeichen, gefolgt von vier Base64-Zeichen. 
+> Erstellen Sie einen deterministischen endlichen Automaten für die CRC-24 Prüfsumme. 
+> Die Menge der erlaubten Base64 Zeichen dürfen sie auch hier mit `x` substituieren
+
+```
+start: (=, base64_0)
+base64_0: (x, base64_1)
+base64_1: (x, base64_2)
+base64_2: (x, base64_3)
+base64_3: (x, end)
+end: Endzustand
+```
+
+> Gegeben [ist] ein endlicher Automat, `B` der Base64-kodierte Strings akzeptiert und ein endlicher Automat, `C`, der die CRC-24 Prüfsumme akzeptiert. 
+> Wie können Sie einen kombinierten nicht-deterministischen endlichen Automaten `BC` erstellen, der einen Base64-kodierten String mit nachfolgender Prüfsumme akzeptiert?
+
+Epsilon Übergang von den Endzuständen von B in den Startzustand von C
+
+</details>
+
+---
+
+## Sonstige Aufgaben
+
 > Gegeben sind zwei endliche Automaten `A` und `B`. Wie lautet der Ansatz, um einen endlichen Automaten `AB` zu erstellen, der alle Worte akzeptiert, die von Automat `A` oder von Automat `B` akzeptiert werden?
 
 Gemeinsamer Startzustand
@@ -165,21 +273,12 @@ Gemeinsamer Startzustand
 
 # Grammatik (-analyse)
 
-> Materialnummer besteht aus Folge von mind. 2 Ziffern, optional gefolgt von genau 3 Buchstaben.
->
-> Beispiele: `74BeD`, `5277`
->
-> Beschreiben Sie Materialnummer als kontextfreie Grammatik
+## Grammatikproduktion umschreiben
 
-```
-Materialnummer ::= Ziffer Ziffer (Ziffer)* (Buchstabe Buchstabe Buchstabe)?
-Ziffer ::= [0-9]
-Buchstabe ::= [a-z] [A-Z]
-```
+Schreiben Sie die Grammatikproduktion `...` in äquivalente Grammatikproduktionen um, die weder `+`, `?`, noch `*`
 
----
-
-> Schreiben Sie die Grammatikproduktion `a ::= (b)? (c)*` in äquivalente Grammatikproduktionen um, die weder `?`, noch `*` benutzt
+<details>
+<summary><code>a ::= (b)? (c)*</code></summary>
 
 ```
 a ::= bOpt cIter;
@@ -187,7 +286,12 @@ bOpt ::= b | ɛ;
 cIter ::= c cIter | ɛ;
 ```
 
-> Schreiben Sie die Grammatikproduktion `a ::= b | c+` in äquivalente Grammatikproduktion um, die keines der Abkürzungen `+`, `*`, `?` verwenden
+</details>
+
+---
+
+<details>
+<summary><code>a ::= b | c+</code></summary>
 
 ```
 a ::= b
@@ -196,7 +300,12 @@ cIter ::= c cIter
 cIter ::= ɛ
 ```
 
-> Schreiben Sie die Grammatikproduktion `a ::= b? c* | d` in äquivalente Grammatikproduktion um, die keines der Abkürzungen `+`, `*`, `?` verwenden
+</details>
+
+---
+
+<details>
+<summary><code>a ::= b? c* | d</code></summary>
 
 ```
 a: bOpt cIter
@@ -207,8 +316,77 @@ cIter: ɛ
 a: d
 ```
 
+</details>
+
 ---
 
+<details>
+<summary><code>anton: (berta | caesar)? dora+</code></summary>
+
+```
+anton: berta_caesar_opt dora_recursive
+berta_caesar_opt: berta_caesar
+berta_caesar_opt: ɛ
+berta_caeser: berta
+berta_caesar: caesar
+dora_recursive: dora dora_recursive
+dora_recursive: dora
+```
+
+> Geben Sie das allgemeine Schema für die Linksfaktorisierung an, um die Linksgleichheit von 2 Produktionen zu beseitigen
+
+```
+n: alpha beta
+n: alpha gamma
+zu
+n: npre npost
+npre: alpha
+npost: beta | gamma
+```
+
+</details>
+
+---
+
+## Grammatikproduktionen, LL(1)
+
+> Gegeben [sind] die folgenden linksrekursive Grammatikproduktion.
+> Wandeln Sie diese in äquivalente rechtsrekursive Grammatikproduktionen.
+>
+> Hinweis: Es genügt die Linksrekursion zu beseitigen. Weiteres kürzen ist nicht erforderlich.
+
+> ```
+> P1) identifier : identifier ZIFFER  
+> P2) identifier : BUCHSTABE identifier
+> P3) identifier: UNDERSCORE
+> ```
+
+```
+α = ZIFFER
+β = BUCHSTABE identifier | UNDERSCORE
+X = identifier
+identifier : BUCHSTABE identifier identifierRecursive  | UNDERSCORE identifierRecursive
+identifierRecursive : ZIFFER identifierRecursive  | ɛ
+```
+
+...
+
+> ```
+> P1) nonT : nonT RTERM
+> P2) nonT: MTERM nonT MTERM
+> P3) nonT: LTERM nonT
+> ```
+
+```
+α = LTERM
+β = MTERM nonT MTERM | LTERM nonT 
+X = nonT
+nonT: (MTERM nonT MTERM | LTERM nonT) nonTRecursive
+nonTRecursive: RTERM nonTRecursive | ɛ 
+
+---
+
+```
 > Gegeben [sind] die folgenden Grammatikproduktionen für das NonTerminal ifStmt
 >
 > ```
@@ -234,54 +412,6 @@ elseOpt ::= ELSE LBRACE stmtlist RBRACE | ɛ
 
 ---
 
-> **` 🔴 HOT `** Geben Sie das allgemeine Schema an, um linksrekursive Produktionen in rechtsrekursive umzuwandeln
-
-```
-X ::= X α | β
-wird zu
-X ::= β X'
-X' ::= α X' | ɛ 
-```
-
----
-
-> Gegeben [sind] die folgenden linksrekursive Grammatikproduktion.
-> Wandeln Sie diese in äquivalente rechtsrekursive Grammatikproduktionen.
->
-> Hinweis: Es genügt die Linksrekursion zu beseitigen. Weiteres kürzen ist nicht erforderlich.
-
-> ```
-> P1) identifier : identifier ZIFFER  
-> P2) identifier : BUCHSTABE identifier
-> P3) identifier: UNDERSCORE
-> ```
-
-```
-α = ZIFFER
-β = BUCHSTABE identifier | UNDERSCORE
-X = identifier
-identifier : BUCHSTABE identifier identifierRecursive  | UNDERSCORE identifierRecursive
-identifierRecursive : ZIFFER identifierRecursive  | ɛ
-```
-
-**---**
-
-> ```
-> P1) nonT : nonT RTERM
-> P2) nonT: MTERM nonT MTERM
-> P3) nonT: LTERM nonT
-> ```
-
-```
-α = LTERM
-β = MTERM nonT MTERM | LTERM nonT 
-X = nonT
-nonT: (MTERM nonT MTERM | LTERM nonT) nonTRecursive
-nonTRecursive: RTERM nonTRecursive | ɛ 
-```
-
----
-
 > Gegeben [sind] die folgenden Grammatikproduktionen
 >
 > ```
@@ -301,6 +431,103 @@ ArgListRecursive ::= Arg ArgListRecursive | ɛ
 > Das First Set von Arg enthält nicht ɛ. Welche Bedingung muss für das First Set von Arg außerdem gelten, damit die Grammatik LL(1) ist?
 
 Die Selection Sets für Produktionen für ArgListRecursive müssen disjunkt sein. Daher muss First(Arg) diskunkt mit Follow(ArgListRecursive) sein, darf also nicht ")" enthalten
+
+---
+
+> Gegeben [sind] die folgenden GRammatikproduktionen
+>
+> ```
+> P1) ifstmt: IF expr THEN stmt
+> P2) ifstmt: IF expr THEN stmt ELSE
+> P3) ifstmt: IF SIGNAL THEN stmt
+> ```
+>
+> Beseitigen Sie die Linksgleichheit durch wiederholte Anwendung der Linksfaktorisierung
+
+```
+n = ifstmt
+alpha = IF
+beta = (expr THEN stmt) | (expr THEN stmt ELSE)
+gamma = SIGNAL THEN stmt
+
+ifstmt : ifstmtpre ifstmtpost
+ifstmtpre : IF
+ifstmtpost : (expr THEN stmt) | (expr THEN stmt ELSE) | (SIGNAL THEN stmt)
+
+n = ifstmtpost
+alpha = expr THEN stmt
+beta = epsilon
+gamma = ELSE
+
+ifstmt : ifstmtpre ifstmtpost
+ifstmtpre : IF
+ifstmtpost : ifstmtpostpre ifstmtpostpost
+ifstmtpostpre : expr THEN stmt
+ifstmtpostpost : epsilon | else
+ifstmtpost : SIGNAL THEN stmt
+```
+
+---
+
+> Ein Widerstandsnetzwerk werde folgendermaßen beschrieben:
+> Widerstände werden durch `IDENT` bezeichnet.
+> Parallel geschaltete Wiederstände werden durch operator `PAR` verknüpft.
+> Seriell geschaltete Wiederstände werden durch operator `SEQ` verknüpft.
+> operator `PAR` hat Priorität vor operator `SEQ`.
+> Klammerung (`LPAREN`, `RPAREN`) ist erlaubt.
+> Einzelne Widerstände können mit einem vorgeschobenen `L` als induktiv und mit `C` als kapazitiv markiert werden.
+> Beispiele:
+>
+> ```
+> R0 PAR R1
+> R0 SEQ L R1 PAR R2
+> (R0 SEQ C R5 SEQ  L R4) PAR R1
+> ```
+> 
+> Erstellen sie eine LL(1) Grammatik für ein solches Widerstandsnetzwerk. 
+> Die Behandlung von Leerzeichen können Sie ignorieren. 
+> Ebenso müssen Sie keine Regeln für die Terminalsymbole (`IDENT`, `PAR`, `SEQ`, `LPAREN`, `RPAREN`) angegeben werden
+
+```
+TerminalSymbole: IDENT, PAR, SEQ, LPAREN, RPAREN
+NonTerminalSymbole: seqExpression, parExpression, atomicExpression
+StartSymbol: seqExpression
+Produktionen:
+seqExpression: parExpression (SEQ parExpression)*
+parExpression: atomicExpression (PAR atomicExpression)*
+atomicExpression: (L|C)? IDENT
+atomicExpression: LPAR seqExpression RPAR
+```
+
+---
+
+> Mengenoperationen werden folgendermaßen beschrieben:
+> Mengen werden durch Bezeichner (`IDENT`) oder durch eine Liste von Elementen angegeben (begrenzt mit Mengenklammern {}). 
+> Elemente werden durch das Token ELEM dargestellt.
+> 
+> Es gibt die Operationen `∪` (Vereinigung), `∩` (Schnitt), `∖` (Differenz) und `⨯` (karthesisches Produkt). 
+> Neben diesen Operationen ist es möglich, Ausdrücke durch Klammern zu verschachteln.
+> 
+> Die Differenz hat die höchste Priorität. Die Junktoren `∪` und `∩` binden stärker als `⨯`.
+> Beispiele für zulässige Mengenausdrücke sind: `(M1 ∖ M2 ∖ M3 ∪ M4) ⨯ { ELEM ELEM }`
+> 
+> Erstellen sie eine LL(1) Grammatik für ein solches Widerstandsnetzwerk. Die Behandlung von Leerzeichen können Sie ignorieren. 
+> Ebenso müssen Sie keine Regeln für die Terminalsymbole (`IDENT`, `ELEM`, `LPAREN`, `RPAREN`, `LBRACE`, `RBRACE`, `∪,` `∩`, `∖`, `⨯`) angeben
+
+```
+Startsymbol: kartExpr
+Terminalsymbole: (IDENT, ELEM, LPAREN, RPAREN, LBRACE, RBRACE, ∪, ∩, ∖,⨯,  )
+NonTerminalsymbole: kartExpr, junktorExpr, junktor, diffExpr, parantheseExpr, literalExpr, elemlist
+Produktionen:
+kartExpr : junktorExpr (x junktorExpr)*
+junktorExpr : diffExpr (junktor diffExpr)*
+junktor: ∪ | ∩
+diffExpr: parantheseExpr (\ parantheseExpr)*
+parantheseExpr: LPAREN diffExpr RPAREN | IDENT | literalExpr
+literalExpr: LBRACE elemlist RBRACE
+elemlist: ELEM elemlist
+elemlist: epsilon
+```
 
 ---
 
@@ -346,22 +573,57 @@ comparison : NUMBER (LESS|GREATER) NUMBER
 
 ---
 
-> Geben Sie eine Grammatik für das `while` Statement in Java an. (`expression` und `statement` gegeben)
+## **` 🔥 HOT ` ** Grammatik in Java
+
+<details>
+<summary><code>while</code> Statement (<code>expression</code> und <code>statement</code> gegeben)</summary>
 
 ```
 whilestmt: "while" "(" expression ")" "{" stmtlist "}"
 stmtlist: statement*
 ```
 
+</details>
+
 ---
 
-> Geben Sie eine Grammatik für das `try .. catch` in Java an.
+<details>
+<summary><code>try..catch</code></summary>
 
 ```
 trystmt: try LBRACE stmtlist RBRACE catchlist
 catchlist: catch*
 catch: CATCH LPAREN exceptionSpecifier RPAREN LBRACE stmtlist RBRACE
 stmtlist: statment*
+```
+
+</details>
+
+---
+
+## Sonstige
+
+> **` 🔥 HOT `** Geben Sie das allgemeine Schema an, um linksrekursive Produktionen in rechtsrekursive umzuwandeln
+
+```
+X ::= X α | β
+wird zu
+X ::= β X'
+X' ::= α X' | ɛ 
+```
+
+---
+
+> Materialnummer besteht aus Folge von mind. 2 Ziffern, optional gefolgt von genau 3 Buchstaben.
+>
+> Beispiele: `74BeD`, `5277`
+>
+> Beschreiben Sie Materialnummer als kontextfreie Grammatik
+
+```
+Materialnummer ::= Ziffer Ziffer (Ziffer)* (Buchstabe Buchstabe Buchstabe)?
+Ziffer ::= [0-9]
+Buchstabe ::= [a-z] [A-Z]
 ```
 
 ---
@@ -384,10 +646,16 @@ stmtlist: statment*
 
 # Recursive Descent Parser
 
+## **` 🔥 HOT `** First Sets etc.
+
+<details>
+<summary><code>LBRACKET, RBRACKET, COMMA, IDENTIFIER, NUMBER</code></summary>
+
+
 > Gegeben [ist] die Grammatik G mit
 >
 > ```
-> Terminals = { LBRACKET RBRACKET, COMMA, IDENTIFIER, NUMBER }
+> Terminals = { LBRACKET, RBRACKET, COMMA, IDENTIFIER, NUMBER }
 > NonTerminals = { ArrrayDefinition, DimensionList, DimensionListRecursive }
 > StartSymbol = ArrayDefinition
 > Produktionen
@@ -443,7 +711,14 @@ void parseDimensionListRecursive() {
 }
 ```
 
-> Gegeben die Grammatik G mit
+</details>
+
+---
+
+<details>
+<summary><code>LETTER, NUMBER, LPAREN, RPAREN</code></summary>
+
+> Gegeben [ist] die Grammatik G mit
 >
 > ```
 > Terminals = { LETTER, NUMBER, LPAREN, RPAREN }
@@ -522,7 +797,205 @@ void processParantheses() {
 }
 ```
 
+</details>
+
 ---
+
+<details>
+<summary>CSV (<code>COMMA, NUMBER, TEXT, LINEBREAK</code>)</summary>
+
+> Gegeben [ist] die Grammatik G mit
+>
+> ```
+> Terminals = { COMMA, NUMBER, TEXT, LINEBREAK }
+> NonTerminals = { csvFile, csvLine, csvEntry }
+> StartSymbol = csvFile
+> 
+> Produktionen und Selection Sets:
+> PF1) csvFile: csvLine csvFile
+> SELECT(PF1) = { NUMBER, TEXT, LINEBREAK }
+> PF2) csvFile: epsilon
+> SELECT(PF2) = { # }
+> PL1) csvLine: csvEntry COMMA csvLine
+> SELECT(PL1) = { NUMBER, TEXT }
+> PL2) csvLine: LINEBREAK
+> SELECT(PL2) = { LINEBREAK }
+> PE1) csvEntry: NUMBER
+> SELECT(PE1) = { NUMBER }
+> PE2) csvEntry: TEXT
+> SELECT(PE2) = { TEXT }
+> ```
+>
+> Erstellen Sie einen recursive descent Parser für diese Grammatik in Pseudocode. 
+> Ein Lexer mit den Methoden `getLookAheadToken()`, `advance()` und `expect(Token)`  ist vorhanden
+
+```java
+void processCsvFile() {
+	if (lexer.lookAheadToken() in (NUMBER, TEXT, LINEBREAK)) {
+		processCsvLine();
+		processCsvFile();
+	} else {
+		lexer.expect(EOF);
+	} 
+}
+void processCsvLine() {
+	if (lexer.lookAheadToken() in (NUMBER, TEXT)) {
+		processCsvEntry();
+		lexer.expect(COMMA);
+		processCsvLine();
+	} else {
+		lexer.expect(LINEBREAK)
+	} 
+
+void processCsvEntry() {
+	if (lexer.lookAhead() in (NUMBER, TEXT)) {
+		lexer.advance();
+    } else {
+		throw error;
+    }
+}
+
+```
+
+</details>
+
+---
+
+<details>
+<summary><code>COMMA, IDENT, NUMBER, LPAREN, RPAREN</code></summary>
+
+> Gegeben die Grammatik G für einen Funktionsaufruf mit
+> 
+> ```
+> Terminals = { COMMA, IDENT, NUMBER, LPAREN, RPAREN }
+> NonTerminals = { fctCall, arglist, arglistwithcomma, arg }
+> StartSymbol = fctCall
+> Produktionen und Selection Sets:
+> PF1) fctCall: IDENT LPAREN arglist RPAREN
+> SELECT(PF1) = { IDENT }
+> PL1) arglist: epsilon
+> SELECT(PL1) = { RPAREN }
+> PL2) arglist: arg arglistcomma 
+> SELECT(PL2) = { NUMBER, IDENT }
+> PC1) arglistcomma: epsilon
+> SELECT(PC1) = { RPAREN }
+> PC2) arglistcomma: COMMA arg arglistcomma
+> SELECT(PC2) = { COMMA }
+> PA1) arg: IDENT
+> SELECT(PA1) = { IDENT }
+> PA2) arg: NUMBER
+> SELECT(PA2) = { NUMBER }
+> ```
+>
+> Erstellen sie einen recursive descent Parser für diese Grammatik in Pseudocode.
+
+```java
+void getFctCall() {
+	lexer.expect(IDENT)
+	lexer.expect(LPAREN)
+	getArgList()
+	lexer.expect(RPAREN)
+}
+
+void getArgList() {
+	if (lexer.getLookAheadToken() == RPAREN) {
+	} else if (lexer.getLookAheadToken() in (NUMBER, IDENT) {
+		getArg();
+		getArglistComma()
+	} else {
+		throw error;
+	}
+}
+
+void getArgListComma() {
+	if (lexer.getLookAheadToken() == RPAREN) {
+	} else if (m_lexer.getLookAheadToken() == COMMA {
+		lexer.expect(COMMA);
+		getArg();
+		getArgListComma()
+	} else {
+		throw error;
+	}
+}
+
+void getArg() {
+	if (lexer.getLookAheadToken() == IDENT) {
+		lexer.expect(IDENT);
+	} else if (lexer.getLookAheadToken() == NUMBER {
+		lexer.expect(NUMBER);
+	} else {
+		throw error;
+	}
+}
+```
+
+</details>
+
+---
+
+<details>
+<summary><code>PRINT, LBRACE, RBRACE</code></summary>
+
+> Gegeben die Grammatik G mit
+>
+> ```
+> Terminals = { PRINT, LBRACE, RBRACE}
+> NonTerminals = { stmt, stmtList }
+> StartSymbol = stmtList
+> 
+> Produktionen
+> P1) stmt : LBRACE stmtlist RBRACE
+> P2) stmt : PRINT
+> P3) stmtlist: epsilon
+> P4) stmtlist: stmt stmtlist
+> ```
+> Berechne die First Sets für alle Produktionen `P1` bis `P4` und die First Sets der NonTerminal Symbole `stmt` und `stmtlist`
+
+```
+FIRST(P1) = { LBRACE }
+FIRST(P2) = { PRINT }
+FIRST(stmt) = FIRST(P1) u FIRST(P2) = { LBRACE, PRINT }
+FIRST(P3) = { epsilon }
+FIRST(P4) = FIRST(stmt) = { LBRACE, PRINT }
+FIRST(stmtlist) = FIRST(P3) u FIRST(P4) = { LBRACE, PRINT, epsilon }
+```
+
+> Berechne die Follow Sets der NonTerminal Symbole `stmt`, `stmtlist`
+
+```
+FOLLOW(stmtlist) = { RBRACE, # }
+FOLLOW(stmt) = {#} u FIRST(stmtlist) / epsilon u FOLLOW(stmtlist) = { #, LBRACE, PRINT, RBRACE }
+```
+
+> Berechne die Selection Sets aller Produktionen `P1` bis `P4`
+
+```
+SELECT(P1) = FIRST(P1) = { LBRACE }
+SELECT(P2) = FIRST(P2) = { PRINT }
+SELECT(P3) = FOLLOW(stmtlist) = { RBRACE, # }
+SELECT(P4) = FIRST(P4) = { LBRACE, PRINT }
+```
+
+> Zeigen Sie, dass diese Grammatik für einen LL(1) Parser eindeutig ist
+
+`P1` ist disjunkt zu `P2` und `P3` ist disjunkt zu `P4`
+
+> Wir ergänzen die Grammatik um die Produktion
+>
+> ```
+> P5) stmt: otherstmt
+> ```
+>
+> Was darf `FIRST(otherstmt)` nicht enthalten, damit die Grammatik eindeutig bleibt?
+
+`SELECT(P5)` muss disjunkt zu `SELECT(P3)` und `SELECT(P4)` sein. 
+Daher darf `FIRST(otherstmt)` [`RBRACE`, `LBRACE`, `PRINT` und *epsilon*] nicht enthalten
+
+</details>
+
+---
+
+## Sonstige
 
 > Warum ist die Verwendung von Keywords (z. B. `if`, `while`) als Variablennamen in den meisten Programmiersprachen verboten?
 
@@ -652,7 +1125,33 @@ Dead Store Elimination für `int x = 7`
 
 ---
 
+> Gegeben ist folgender Java Code:
+>
+> ```java
+> int index = 2;
+> int output = 0;
+> while (true) {
+>     output = output + 1;
+>     if (index == 5) {
+>         break;
+>     }
+>     index = index + 1;
+> }
+> ```
+> Dieser kann optimiert werden. Nennen Sie die dafür nötigen Optimierungsschritte. 
+> Es genügt die Namen der Optimierungsschritte zu nennen oder die Optimierungsschritte kurz zu beschreiben.
+
+Loop unrolling
+Constant folding
+Constant propagation
+Dead branch elimination
+
+---
+
 # Zwischencodegenerierung
+
+<details>
+<summary><code>index</code> Counter to 10</summary>
 
 > Gegeben [ist] der folgende Java Codeausschnitt
 >
@@ -686,7 +1185,12 @@ jump while_head;
 after_while:
 ```
 
+</details>
+
 ---
+
+<details>
+<summary><code>input</code> if elseif else</summary>
 
 > Gegeben ist der folgende Java Codeausschnitt
 >
@@ -735,6 +1239,121 @@ jump exit;
 exit:
 ```
 
+</details>
+
+---
+
+<details>
+<summary><code>index</code> und <code>output</code> in <code>while</code> mit <code>break</code></summary>
+
+> Gegeben [sei] der folgende Java Codeausschnitt:
+>
+> ```java
+> int index = 2;
+> int output = 0;
+> while (true) {
+>     output = output + 1;
+>     if (index == 5) {
+>         break;
+>     }
+>     index = index + 1;
+> }
+> ```
+>
+> Schreiben Sie Zwischencode für diesen Codeausschnitt (ohne Optimierung)
+
+```
+entry:
+alloca i32, %outerIndex
+store %outerIndex, 2
+alloca i32, %output
+store %output, 0
+jmp whileHead
+
+whileHead:
+load r0, 1
+jmp r0, whileBody, exit
+
+whileBody:
+load r1, %output
+r2 = add r1, 1
+store %output
+load r3, %index
+r4 = cmpless r3, 5
+jmp r4 ifThen, ifExit
+ifThen:
+jmp whileExit
+ifExit:
+load r5, %index
+r6 = add r5, 1
+store %index
+jmp whileHead
+whileExit:
+```
+
+</details>
+
+---
+
+<details>
+<summary>Neues Java Statement: <code>NUMERIC_IF</code></summary>
+
+> Wir ergänzen die Programmiersprache Java um ein neues Statement NUMERIC_IF:
+>
+> ```
+> NUMERIC_IF expr POSITIVE blockstmt ZERO blockstmt NEGATIVE blockstmt
+> NUMERIC_IF verzweigt
+>   zum blockstmt nach POSITIVE wenn expr > 0
+>   zum blockstmt nach ZERO wenn expr ==0
+>   zum blockstmt nach NEGATIVE wenn expr < 0
+> ```
+> 
+> Gegeben der folgende Java Codeausschnitt mit NUMERIC_IF
+>
+> ```java
+> int output = 0;
+> NUMERIC_IF (index) POSITIVE {
+> output = 4;
+> } ZERO {
+> output = output + 1;
+> } NEGATIVE {
+> output = index + 1;
+> }
+> ```
+> 
+> Schreiben Sie Zwischencode für diesen Codeausschnitt (ohne Optimierung)
+
+```
+start:
+alloca %output
+store %output, 0
+%1 = load %index
+%2 = cmp greater %index, 0
+jmp %2 positive, zero_or_negative
+positive:
+store %output, 4
+jmp exit
+zero_or_negative:
+%3 = load %index
+%4 = cmp less %index, 0
+jmp %4 negative, zero
+zero:
+%5 = load %output
+%6 = add %5, 1
+store %output, %6
+jmp exit
+negative:
+%7 = load %index
+%8 = add %7, 1
+store %output, %8
+jmp exit
+exit:
+```
+
+</details>
+
+---
+
 # Interpreter
 
 > Gegeben die Grammatikregel für den Operator `add`:
@@ -761,4 +1380,49 @@ class InstrAdd:
         int op0 = env.pop_number()
         int op1 = env.pop_number()
         int result = op0 + op1
+```
+
+---
+
+> Gegeben ist die Grammatikregel für den Select Operator:
+>
+> ```
+> selectExpr: sumExpr QUESTIONMARK sumExpr COLON sumExpr
+> ```
+> 
+> Das Ergebnis des Selectoperators ist folgendermaßen definiert
+> 
+> Wenn die erste `sumExpr` `true` ist, liefere den Wert der zweiten `sumExpr` sonst den Wert der dritten `sumExpr` 
+>
+> Beispiel: 
+>
+> ```cpp
+> 1 ? 4 : 7 // ergibt 4
+> 0 ? 2 : 5 + 9 // ergibt 14
+> ```
+>
+> Skizzieren Sie in Pseudocode die Methode `parseSelectExpr()` welche die Eingabe analysiert und eine SelectInstruction für den Interpreter erzeugt.
+
+```java
+void parseSelectExpr() {
+	parseSumExpr();
+	expect(QUESTIONMARK);
+	parseSumExpr();
+	expect(DOUBLECOLON);
+	parseSumExpr();
+	Instruction selectInstr = createSelectInstruction();
+	this.currentBlock.addInstruction(selectInst);
+}
+```
+
+> Skizzieren Sie in Pseudocode die Methode `execute(ExecutionEnv)` der Klasse `InstrSelect` um die Selection im Interpreter auszuführen 
+
+```cpp
+void InstrSelect::execute(ExecutionEnv env) {
+	int op2 = env.popNumber();
+	int op1 = env.popNumber();
+	int op0 = env.popNumber();
+	int result = (op0 != 0) ? op1 : op2;
+	env.pushNumber(result);
+}
 ```
