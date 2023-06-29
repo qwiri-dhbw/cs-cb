@@ -1,13 +1,21 @@
-  # Aufgabe 1 (Compilephasen)
+# Compilephasen
 
-> Nennen Sie die 6 Compilephasen
+> **` 🔴 HOT `** Phasen angeben, Input, Output, Typische Fehlermeldungen
 
-1. Lexikalische Analyse
-2. Syntaktische Analyse
-3. Semantische Analyse
-4. Zwischencodegenerierung
-5. Optimierung
-6. Maschinencodegenerierung
+| Phase                    | Input        | Output                           | Typische Fehlermeldung                   |
+| ------------------------ | ------------ | -------------------------------- | ---------------------------------------- |
+| Lexikalische Analyse     | Zeichen      | Token                            | Fehlendes `"` am Ende des Stringliterals |
+| Syntaktische Analyse     | Token        | AST                              | Fehlende schließende Klammer             |
+| Semantische Analyse      | AST          | AST mit TypeInfo + SymbolTabelle | Variable nicht deklariert                |
+| Zwischencodegenerierung  | AST          | Symboltabelle -> Zwischencode    |                                          |
+| Optimierung              | Zwischencode | Zwischencode                     |                                          |
+| Maschinencodegenerierung | Zwischencode | Ausführbarer Code                |                                          |
+
+---
+
+> Ab dem Ende welcher Phase ist garantiert, dass das Programm fehlerfrei übersetzbar ist?
+
+Semantische Analyse
 
 ---
 
@@ -31,14 +39,37 @@ Syntaktische Anaylse
 
 ---
 
-# Aufgabe 2 (Reguläre Ausdrücke)
+> Gegeben [ist] der Programmausschnitt: `mwst = preis + 0.19 * preis;`. Skizzieren Sie das Ergebnis der 1. und 2. Compilephase für diesen Programmausschnitt
+
+**Phase 1**: `mwst|=|preis|+|0.19|*|preis|;`
+
+**Phase 2**:
+
+```
+assignStmt
+	IDENT mwst
+	sumExpr
+		IDENT preis
+		mulExpr
+			LITERAL 0.19
+			IDENT preis
+```
+
+---
+
+# Reguläre Ausdrücke
 
 > Hexadezimalzahlen bestehen aus dem Prefix 0x und mindestens eine Ziffer aus 0-9 und A-F.
 > Beispiel: 0xA4, 0x00C3
 > 
 > Beschreiben Sie Hexadezimalzahlen mit einem regulären Ausdruck
+> **Note** ggf. zusätzlich mit Kleinbuchstaben, auf Aufgabe achten!
 
+```re
 0x[0-9A-F]+
+oder:
+0x[0-9A-Fa-f]+
+```
 
 > Erstellen Sie einen endlichen Automaten, der Hexadezimalzahlen akzeptiert
 
@@ -68,7 +99,71 @@ letterIter: (a-z, letterIter) Endzustand
 
 ---
 
-## Aufgabe 3 (Grammatik)
+> Erstellen Sie einen regulären Ausdruck, der alle natürlichen Zahlen > 0 erlaubt (z. B. `347`)
+
+```re
+[1-9][0-9]*
+```
+
+> Ergänzen Sie den regulären Ausdruck so, dass nach jeweils 3 Stellen von hinten ein `.` aks Tausendertrennzeichen erlaubt ist
+> z. B. `1234`, `1.234`, `3.689755`, `2067.418`
+
+```re
+[1-9]\d{0,2}(\.?\d{3})
+```
+
+> Erstellen Sie einen endlichen Automaten, der Namen die mit einem Buchstaben beginnen, und im folgenden Buchstaben oder Ziffern beinhalten können, akzeptiert
+> z. B. `abc`, `A22`, `c5E`
+
+```
+Start: (a-zA-Z, charIter)
+charIter: (a-zA-Z0-9, charIter) Endzustand
+```
+
+> Erstellen Sie einen endlichen Automaten, der eine natürliche Zahl gefolgt von einem Namen akzeptiert
+
+```
+Start: ([1-9], digitIter)
+digitIter: ([0-9], letterStart)
+letterStart: ([a-zA-Z], letterIter) Endzustand
+letterIter: ([a-zA-Z0-9], letterIter) Endzustand
+```
+
+---
+
+> Erstellen Sie einen endlichen Automaten, der Python Stringliterale (mit 3 Anführungszeichen) akzeptiert.
+
+```
+Start: (", hochkomma1)
+hochkomma1: (", hochkomma2)
+hochkomma2: (", innerLiteral)
+innerLiteral: (", innerhochkomma1), ([^"], innerLiteral)
+innerhochkomma1: (", innerhochkomma2) , ([^"], innerLiteral)
+innerhochkomma2: (", ende) , ([^"], innerLiteral)
+ende: Endzustand
+```
+
+---
+
+> Erstelle für den regulären Ausdruck `([A-Z][0-9])*|(xy)+` einen äquivalenten deterministischen endlichen Automaten
+
+```
+Start: (A-Z, afterBigLetter) (x, afterX) Endzustand
+afterBigLetter: (0-9, afterDigit)
+afterDigit: (A-Z, afterBigLetter) Endzustand
+afterX: (y, afterY)
+afterY: (x, afterX) Endzustand
+```
+
+---
+
+> Gegeben sind zwei endliche Automaten `A` und `B`. Wie lautet der Ansatz, um einen endlichen Automaten `AB` zu erstellen, der alle Worte akzeptiert, die von Automat `A` oder von Automat `B` akzeptiert werden?
+
+Gemeinsamer Startzustand
+
+---
+
+# Grammatik (-analyse)
 
 > Materialnummer besteht aus Folge von mind. 2 Ziffern, optional gefolgt von genau 3 Buchstaben.
 >
@@ -90,6 +185,26 @@ Buchstabe ::= [a-z] [A-Z]
 a ::= bOpt cIter;
 bOpt ::= b | ɛ;
 cIter ::= c cIter | ɛ;
+```
+
+> Schreiben Sie die Grammatikproduktion `a ::= b | c+` in äquivalente Grammatikproduktion um, die keines der Abkürzungen `+`, `*`, `?` verwenden
+
+```
+a ::= b
+a ::= c cIter
+cIter ::= c cIter
+cIter ::= ɛ
+```
+
+> Schreiben Sie die Grammatikproduktion `a ::= b? c* | d` in äquivalente Grammatikproduktion um, die keines der Abkürzungen `+`, `*`, `?` verwenden
+
+```
+a: bOpt cIter
+bOpt: b
+bOpt: ɛ 
+cIter: c cIter 
+cIter: ɛ
+a: d
 ```
 
 ---
@@ -119,14 +234,7 @@ elseOpt ::= ELSE LBRACE stmtlist RBRACE | ɛ
 
 ---
 
-> Gegeben [sind] die folgenden Grammatikproduktionen
->
-> ```
-> P1) Call ::= IDENTIFIER ArgList ")"
-> P2) ArgList ::= ArgList Arg | "("
-> ```
->
-> Die Produktion P2 ist linksrekursiv. Geben Sie das allgemeine Schema an, um linksrekursive Produktionen in rechtsrekursive umzuwandeln
+> **` 🔴 HOT `** Geben Sie das allgemeine Schema an, um linksrekursive Produktionen in rechtsrekursive umzuwandeln
 
 ```
 X ::= X α | β
@@ -135,7 +243,55 @@ X ::= β X'
 X' ::= α X' | ɛ 
 ```
 
-> Wandeln Sie P2 in äquivalente rechtsrekursive Produktionen um
+---
+
+> Gegeben [sind] die folgenden linksrekursive Grammatikproduktion.
+> Wandeln Sie diese in äquivalente rechtsrekursive Grammatikproduktionen.
+>
+> Hinweis: Es genügt die Linksrekursion zu beseitigen. Weiteres kürzen ist nicht erforderlich.
+
+> ```
+> P1) identifier : identifier ZIFFER  
+> P2) identifier : BUCHSTABE identifier
+> P3) identifier: UNDERSCORE
+> ```
+
+```
+α = ZIFFER
+β = BUCHSTABE identifier | UNDERSCORE
+X = identifier
+identifier : BUCHSTABE identifier identifierRecursive  | UNDERSCORE identifierRecursive
+identifierRecursive : ZIFFER identifierRecursive  | ɛ
+```
+
+**---**
+
+> ```
+> P1) nonT : nonT RTERM
+> P2) nonT: MTERM nonT MTERM
+> P3) nonT: LTERM nonT
+> ```
+
+```
+α = LTERM
+β = MTERM nonT MTERM | LTERM nonT 
+X = nonT
+nonT: (MTERM nonT MTERM | LTERM nonT) nonTRecursive
+nonTRecursive: RTERM nonTRecursive | ɛ 
+```
+
+---
+
+> Gegeben [sind] die folgenden Grammatikproduktionen
+>
+> ```
+> P1) Call ::= IDENTIFIER ArgList ")"
+> P2) ArgList ::= ArgList Arg | "("
+> ```
+>
+> Die Produktion P2 ist linksrekursiv. 
+> 
+> Wandeln Sie P2 in äquivalente rechtsrekursive Produktionen um.
 
 ```
 ArgList ::= "(" ArgListRecursive
@@ -170,7 +326,63 @@ orExpr ::= andExpr ("or" andExpr)*
 
 ---
 
-## Aufgabe 4 (Recursive Descent Parser)
+> Erstellen Sie eine LL(1) Grammatik für Conditions, die folgendes erlaubt:
+>
+> - Vergleiche mit (<, >)
+> - Und/Oder Verknüpfung von Vergleichen und anderen Und/Oder Verknüpfungen
+> - Klammerung von Und/Oder Verknüpfungen
+>
+> Die Behandlung von Leerzeichen können Sie ignorieren. Ebenso müssen Sie keine Regeln für die Terminalsymbole angeben.
+
+```
+TerminalSymbole: NUMBER, AND, OR, LPAREN, RPAREN, LESS, GREATER
+NonTerminalSymbole: comparison, logicalExpression, atomicLogicalExpression
+StartSymbol: logicalExpression
+Produktionen:
+logicalExpression : atomicLogicalExpression ((AND|OR) atomicLogicalExpression)*
+atomicLogicalExpression : comparison | LPAREN logicalExpression RPAREN
+comparison : NUMBER (LESS|GREATER) NUMBER
+```
+
+---
+
+> Geben Sie eine Grammatik für das `while` Statement in Java an. (`expression` und `statement` gegeben)
+
+```
+whilestmt: "while" "(" expression ")" "{" stmtlist "}"
+stmtlist: statement*
+```
+
+---
+
+> Geben Sie eine Grammatik für das `try .. catch` in Java an.
+
+```
+trystmt: try LBRACE stmtlist RBRACE catchlist
+catchlist: catch*
+catch: CATCH LPAREN exceptionSpecifier RPAREN LBRACE stmtlist RBRACE
+stmtlist: statment*
+```
+
+---
+
+# Semantische Analyse
+
+> Gegeben die Grammatikregel für eine Variablendeklaration:
+>
+> ```
+> varDecl ::= IDENTIFIER IDENTIFIER ASSIGN expr SEMICOL
+> ```
+>
+> Welche Aktionen geschehen für eine Variablendeklaration während der semantischen Analyse?
+
+- Prüfung ob eine Variable mit dem gegebenen (zweiten) `IDENTIFIER` bereits existiert.
+- Einfügen der Variable mit dem gegebenen `IDENTIFIER` und dem aktuellen Scope in die Symboltabelle
+- Feststellen des Typs der Variable anhand des (ersten) `IDENTIFIER`
+- Prüfen ob `expr` einen dazu kompatiblen Typ hat
+- Gegebenenfalls eine implizite Typkonvertierung einfügen
+
+# Recursive Descent Parser
 
 > Gegeben [ist] die Grammatik G mit
 >
@@ -231,13 +443,94 @@ void parseDimensionListRecursive() {
 }
 ```
 
+> Gegeben die Grammatik G mit
+>
+> ```
+> Terminals = { LETTER, NUMBER, LPAREN, RPAREN }
+> NonTerminals = { start, name, parantheses }
+> StartSymbol = start
+> 
+> Produktionen
+> PS1)	start	 	: name
+> PS2)	start		: parantheses
+> PN1)	name		: LETTER name NUMBER
+> PN2)	name		: LETTER NUMBER
+> PP1)	parantheses	: LPAREN start RPAREN
+> PP2)	parantheses	: ɛ 
+> ```
+>
+> Bestimme die First Sets für alle Produktionen `PS1` bis `PP2` und die First Sets der NonTerminal Symbole `start`, `name`, `parantheses`
+
+```
+First(PN1) = { LETTER }
+First(PN2) = { LETTER }
+First(PP1) = { LPAREN }
+First(PP2) = { ɛ }
+First(parantheses) =First(PP1) u First(PP2) =  { LPAREN, ɛ }
+First(name) = First(PN1) u First(PN2) = { LETTER }
+First(PS1) = First(name) = { LETTER }
+First(PS2) = First(parantheses) = { LPAREN, ɛ }
+First(start)= First(PS1) u First(PS2) = { LETTER, LPAREN, ɛ }
+```
+
+> Berechne die Follow Sets der NonTerminalSymbole `start`, `name`, `parantheses`
+
+```
+Follow(start) = { # } u {RPAREN} = { #, RPAREN }
+Follow(name) = { NUMBER } u Follow(start) = { NUMMBER, #, RPAREN}
+Follow(parantheses) = Follow(start) = { #, RPAREN }
+```
+
+> Berechne die Selection Sets aller Produktionen `PS1` bis `PP2`
+
+```
+Select(PS1) = First(PS1) = { LETTER }
+Select(PS2) = First(PS2) / { ɛ } u Follow(start)  = { LPAREN, RPAREN, # }
+Select(PN1) = First(PN1) = { LETTER }
+Select(PN2) = First(PN2) =  { LETTER }
+Select(PP1) = First(PP1) = { LPAREN }
+Select(PP2) = Follow(parantheses) = { #, RPAREN }
+```
+
+> Entfernen Sie die Produktion `PN1` und implementieren Sie den recursive descent Parser für die verbleibende Grammatik in Pseudocode.
+
+```java
+void processStart() {
+    if (lexer.lookAheadToken() == LETTER) {
+        processName();
+    } else if (lexer.lookAheadToken() in (LPAREN, RPAREN, EOF)) {
+        processParantheses();
+    } else {
+        throw error;
+    }
+}
+
+void processName() {
+    lexer.expect(LETTER);
+    lexer.expect(NUMBER);
+}
+
+void processParantheses() {
+    if (lexer.lookAhead() == LPAREN) {
+        lexer.advance();
+        processStart();
+        lexer.expect(RPAREN);
+    } else if (lexer.lookAhead() in (RPAREN, EOF)) {
+    } else {
+        throw error;
+    }
+}
+```
+
+---
+
 > Warum ist die Verwendung von Keywords (z. B. `if`, `while`) als Variablennamen in den meisten Programmiersprachen verboten?
 
 Die Keywords erlauben es Sprachkonstrukte eindeutig zu erkennen. Dadurch reduziert sich das Risiko von Grammatikkonflikten.
 
 ---
 
-## Aufgabe 5 (LR Parser)
+# LR Parser
 
 > Was ist der Vorteil eines LR Parsers gegenüber einem LL Parser?
 
@@ -279,7 +572,43 @@ Nach shift von "a" und lookahead "b" ist sowohl der reduce von "a" nach x mögli
 
 ---
 
-## Aufgabe 6 (Optimierung)
+> Gegeben [ist] die Grammatik G mit
+>
+> ```
+> Terminals { NUMBER, KOMMA }
+> NonTerminals {arglist, arg }
+> Startsymbol: arglist
+> Produktionen:
+> arglist: arg
+> arglist: arglist KOMMA arg
+> arg: NUMBER
+> ```
+>
+> Gegeben das Eingabewort: `45,7,12`. Zeigen Sie die Schritte mit denen ein LR(1)-Parser (BottomUp Parser) das Eingabewort analysiert
+
+```
+shift NUMBER 45
+reduce NUMBER => arg
+reduce arg => arglist
+shift KOMMA
+shift NUMBER 7
+reduce NUMBER => arg
+reduce arglist KOMMA arg => arglist
+reduce arg => arglist 
+shift KOMMA
+shift NUMBER 12
+reduce NUMBER => arg
+reduce arglist KOMMA arg => arglist
+```
+
+> Nach welchem Kriterium entscheidet der LR(1)-Parser, ob er die Produktion
+> `arglist: arg` oder `arglist: arglist KOMMA arg` anwendet?
+
+Anhand des look ahead symbols. Im Falle von `KOMMA` wird die Reduktion `arg => arglist` angewendet im Falle von `EOF` die Reduktion `arglist KOMMA arg => arglist`.
+
+---
+
+# Optimierung
 
 > Gegeben ist folgende Java Methode:
 >
@@ -323,7 +652,7 @@ Dead Store Elimination für `int x = 7`
 
 ---
 
-## Aufgabe 7 (Zwischencodegenerierung)
+# Zwischencodegenerierung
 
 > Gegeben [ist] der folgende Java Codeausschnitt
 >
@@ -355,4 +684,81 @@ store index, r3;
 jump while_head;
 
 after_while:
+```
+
+---
+
+> Gegeben ist der folgende Java Codeausschnitt
+>
+> ```java
+> {
+>     int input = 10;
+>     int output;
+>     if (input < 6) {
+>         output = 4;
+>     } else if (input < 11) {
+>         output = 3;
+>     } else {
+>         output = 2;
+>     }
+> }
+> ```
+>
+> Schreiben Sie Zwischencode für diesen Codeausschnitt
+
+```
+entry:
+alloca i32, %input
+store %input, 9
+alloca i32, %output
+load r0, %input
+r1 = cmpless r0, 5
+jump r1, if, elseifcheck
+
+if:
+store %output, 3
+jump exit;
+
+elseifcheck:
+load r2, %input
+r3 = cmpless r2, 10
+jump r3, elseif, else
+
+elseif:
+store %output, 2
+jump exit;
+
+else:
+store %output, 1
+jump exit;
+
+exit:
+```
+
+# Interpreter
+
+> Gegeben die Grammatikregel für den Operator `add`:
+>
+> ```
+> sum : summand (PLUS summand)*
+> ```
+> Skizzieren Sie in Pseudocode die Methode `parseSum()` welche die Eingabe analysiert und Instruktionen für den Interpreter erzeugt 
+
+```python
+def parse_sum(self):
+    parse_summand()
+    while self.lexer.look_ahead_token() == PLUS:
+        parse_summand()
+        Instruction add_instr = create_add_instruction()
+        self.current_block.add_instruction(add_instr)
+```
+
+> Skizzieren Sie in Pseudocode die Methode `execute(ExecutionEnv)` der Klasse `InstrAdd`, um die Addition im Interpreter auszuführen
+
+```python
+class InstrAdd:
+    def execute(env: ExecutionEnv):
+        int op0 = env.pop_number()
+        int op1 = env.pop_number()
+        int result = op0 + op1
 ```
