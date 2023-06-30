@@ -1364,6 +1364,7 @@ exit:
 def parse_sum(self):
     parse_summand()
     while self.lexer.look_ahead_token() == PLUS:
+        self.lexer.advance()
         parse_summand()
         Instruction add_instr = create_add_instruction()
         self.current_block.add_instruction(add_instr)
